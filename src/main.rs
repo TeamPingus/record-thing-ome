@@ -16,9 +16,6 @@ async fn startrecord() -> Result<()> {
             }
       };
 
-    //let mut map = HashMap::new();
-    //map.insert("id", "stream");
-    //map.insert("name", "stream");
     let client = Client::new();
     let res = client
         .post("http://api.pingusmc.org:8081/v1/vhosts/default/apps/app:startRecord")
@@ -82,11 +79,6 @@ async fn records() -> Result<()> {
 }
 #[tokio::main]
 async fn main() -> Result<()> {
-    //let args: Vec<String> = env::args().collect();
-    //startrecord().await?;
-    //stoprecord().await?;
-    //records().await?;
-
     fn print_usage(program: &str, opts: Options) {
         let brief = format!("Usage: {} program [options]", program);
         print!("{}", opts.usage(&brief));
@@ -96,13 +88,41 @@ async fn main() -> Result<()> {
     let program = args[0].clone();
 
     let mut opts = Options::new();
-    opts.opt("1", "start", "start Recording", "", HasArg::No, Occur::Optional);
-    opts.opt("2", "stop", "stop Recording", "", HasArg::No, Occur::Optional);
-    opts.opt("3", "status", "see status of recording", "", HasArg::No, Occur::Optional);
-    opts.opt("h", "help", "print this help", "", HasArg::No, Occur::Optional);
+    opts.opt(
+        "1",
+        "start",
+        "start Recording",
+        "",
+        HasArg::No,
+        Occur::Optional,
+    );
+    opts.opt(
+        "2",
+        "stop",
+        "stop Recording",
+        "",
+        HasArg::No,
+        Occur::Optional,
+    );
+    opts.opt(
+        "3",
+        "status",
+        "see status of recording",
+        "",
+        HasArg::No,
+        Occur::Optional,
+    );
+    opts.opt(
+        "h",
+        "help",
+        "print this help",
+        "",
+        HasArg::No,
+        Occur::Optional,
+    );
 
     let matches = match opts.parse(&args[..]) {
-        Ok(m) => { m }
+        Ok(m) => m,
         Err(f) => {
             print!("hello");
             panic!("{}", f.to_string())
@@ -123,11 +143,7 @@ async fn main() -> Result<()> {
         records().await?;
     }
 
-
     Ok(())
 }
 
-
-
 //
-
