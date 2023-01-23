@@ -13,7 +13,8 @@ async fn startrecord() -> Result<()> {
     id: "stream",
     stream: {
       name: "stream"
-            }
+            },
+        segmentationRule : "continuity"
       };
 
     let client = Client::new();
