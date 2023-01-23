@@ -2,7 +2,7 @@
 
 Thing to call api of Ovenmediaengine, to start/stop recording and check status
 
-Usage
+Usage:
 ```bash
 ./record-thing-ome -h
 ```
