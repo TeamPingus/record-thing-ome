@@ -19,8 +19,9 @@ async fn startrecord() -> Result<()> {
 
     let client = Client::new();
     let res = client
-        .post("http://api.pingusmc.org:8081/v1/vhosts/default/apps/app:startRecord")
-        .header("authorization", "Basic b21lLWFjY2Vzcy10b2tlbg==")
+        .post("<yourapidomain>/v1/vhosts/default/apps/app:startRecord")
+         // Auth code from Server.xml in Base64
+	.header("authorization", "Basic <your auth code>")
         .body(Body::from(data.dump()))
         .send()
         .await?;
@@ -41,8 +42,9 @@ async fn stoprecord() -> Result<()> {
 
     let client = Client::new();
     let res = client
-        .post("http://api.pingusmc.org:8081/v1/vhosts/default/apps/app:stopRecord")
-        .header("authorization", "Basic b21lLWFjY2Vzcy10b2tlbg==")
+        .post("<yourapidomain>/v1/vhosts/default/apps/app:stopRecord")
+         // Auth code from Server.xml in Base64
+	.header("authorization", "Basic <your auth code>")
         .json(&map)
         .send()
         .await?;
@@ -63,8 +65,9 @@ async fn records() -> Result<()> {
 
     let client = Client::new();
     let res = client
-        .post("http://api.pingusmc.org:8081/v1/vhosts/default/apps/app:records")
-        .header("authorization", "Basic b21lLWFjY2Vzcy10b2tlbg==")
+        .post("<yourapidomain>/v1/vhosts/default/apps/app:records")
+         // Auth code from Server.xml in Base64
+	.header("authorization", "Basic <your auth code>")
         .json(&map)
         .send()
         .await?;
