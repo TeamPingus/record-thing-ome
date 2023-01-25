@@ -3,7 +3,7 @@
 Thing to call api of Ovenmediaengine, to start/stop recording and check status
 
 ## You need to edit src/main.rs to set your domain and auth header. otherwise it wont work
-## https api calls dont seem to work currently, didnt figure out why, yet.
+### https api calls dont seem to work currently, didnt figure out why, yet.
 
 ### Build instructions:
 ```bash
