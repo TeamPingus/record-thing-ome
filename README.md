@@ -22,7 +22,12 @@ cargo b -r
 cp target/release/record-thing-ome ~/.local/bin
 ```
 
-put an alias to ~/.local/bin/record-thing-ome in your .zshrc or .bashrc, then source it by doing:
+put an alias to ~/.local/bin/record-thing-ome in your .zshrc or .bashrc:
+```bash
+alias ome-rec="~/.local/bin/record-thing-ome"
+```
+
+then source it by doing:
 ```bash
 source ~/.zshrc 
 # or 
