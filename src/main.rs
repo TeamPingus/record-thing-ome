@@ -123,7 +123,7 @@ async fn main() -> Result<()> {
     iwanttofuckingdie();
     // cli stuff
     fn print_usage(program: &str, opts: Options) {
-        let brief = format!("Usage: {} program [options]", program);
+        let brief = format!("Usage: {} [options]", program);
         print!("{}", opts.usage(&brief));
     }
 
@@ -163,6 +163,14 @@ async fn main() -> Result<()> {
         HasArg::No,
         Occur::Optional,
     );
+    opts.opt(
+        "c",
+        "config",
+        "config location",
+        "",
+        HasArg::No,
+        Occur::Optional,
+    );
 
     let matches = match opts.parse(&args[..]) {
         Ok(m) => m,
@@ -185,7 +193,9 @@ async fn main() -> Result<()> {
     if matches.opt_present("3") {
         records().await?;
     }
-
+    if matches.opt_present("c") {
+        println!("Not implemented yet, deal with it");
+    }
     Ok(())
 }
 
