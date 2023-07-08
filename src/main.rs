@@ -1,12 +1,22 @@
 extern crate getopts;
+extern crate lazy_static;
+
 use getopts::{HasArg, Occur, Options};
 use json::object;
 use reqwest::{Body, Client};
 use std::collections::HashMap;
 use std::env;
+use std::ops::Add;
+use std::path::Path;
+use std::process::exit;
+use crate::config::{CONFIG, create_config};
+
+mod config;
 
 type Error = Box<dyn std::error::Error>;
 type Result<T, E = Error> = std::result::Result<T, E>;
+
+// api stuff (send help btw)
 
 async fn startrecord() -> Result<()> {
     let data = object! {
@@ -17,11 +27,13 @@ async fn startrecord() -> Result<()> {
         segmentationRule : "continuity"
       };
 
+    let domain = &CONFIG.domain.clone().add("/v1/vhosts/default/apps/app:startRecord");
+    let token = &CONFIG.token;
+
     let client = Client::new();
     let res = client
-        .post("<yourapidomain>/v1/vhosts/default/apps/app:startRecord")
-         // Auth code from Server.xml in Base64
-	.header("authorization", "Basic <your auth code>")
+        .post(domain)
+        .header("authorization", token)
         .body(Body::from(data.dump()))
         .send()
         .await?;
@@ -40,11 +52,13 @@ async fn stoprecord() -> Result<()> {
     let mut map = HashMap::new();
     map.insert("id", "stream");
 
+    let domain = &CONFIG.domain.clone().add("/v1/vhosts/default/apps/app:stopRecord");
+    let token = &CONFIG.token;
+
     let client = Client::new();
     let res = client
-        .post("<yourapidomain>/v1/vhosts/default/apps/app:stopRecord")
-         // Auth code from Server.xml in Base64
-	.header("authorization", "Basic <your auth code>")
+        .post(domain)
+        .header("authorization", token)
         .json(&map)
         .send()
         .await?;
@@ -63,11 +77,13 @@ async fn records() -> Result<()> {
     let mut map = HashMap::new();
     map.insert("id", "");
 
+    let domain = &CONFIG.domain.clone().add("/v1/vhosts/default/apps/app:records");
+    let token = &CONFIG.token;
+
     let client = Client::new();
     let res = client
-        .post("<yourapidomain>/v1/vhosts/default/apps/app:records")
-         // Auth code from Server.xml in Base64
-	.header("authorization", "Basic <your auth code>")
+        .post(domain)
+        .header("authorization", token)
         .json(&map)
         .send()
         .await?;
@@ -81,8 +97,31 @@ async fn records() -> Result<()> {
 
     Ok(())
 }
+
+fn iwanttofuckingdie() {
+    let domain = &CONFIG.domain;
+    let token = &CONFIG.token;
+
+    if domain.contains("DOMAIN") {
+        println!("\x1b[0;31myou might want to consider replacing 'DOMAIN' in stuff.conf with your actual api domain\x1b[0m");
+        exit(1);
+    }
+    if token.contains("TOKEN") {
+        println!("\x1b[0;31myou might want to consider replacing 'TOKEN' in stuff.conf with your actual api token\x1b[0m");
+        exit(1);
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
+    // create config if doesnt exist
+    if Path::new("stuff.conf").exists() {
+        println!("Using config: stuff.conf");
+    } else {
+        create_config().expect("failed to create config");
+    }
+    iwanttofuckingdie();
+    // cli stuff
     fn print_usage(program: &str, opts: Options) {
         let brief = format!("Usage: {} program [options]", program);
         print!("{}", opts.usage(&brief));

@@ -2,8 +2,9 @@
 
 Thing to call api of Ovenmediaengine, to start/stop recording and check status
 
-## You need to edit src/main.rs to set your domain and auth header. otherwise it wont work
-### https api calls dont seem to work currently, didnt figure out why, yet.
+## Set your api token and domain in stuff.conf (You need to put the values in quotes, like this: "http://pingusmc.org". The same for the token.)
+## Do NOT remove Basic from stuff.conf at token: "Basic TOKEN"! Otherwise, it will NOT work
+### https api calls don't seem to work currently, didn't figure out why, yet.
 
 ### Build instructions:
 ```bash
