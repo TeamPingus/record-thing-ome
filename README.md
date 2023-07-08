@@ -27,6 +27,11 @@ put an alias to ~/.local/bin/record-thing-ome in your .zshrc or .bashrc:
 alias ome-rec="~/.local/bin/record-thing-ome"
 ```
 
+config location stuff is a bit retarded at the moment, in the meantime you can have something like this in your .zshrc or .bashrc:
+```bash
+bash -c "cd /home/passihd/.config/ome-rec; /home/passihd/.local/bin/record-thing-ome -h"
+```
+
 then source it by doing:
 ```bash
 source ~/.zshrc 
