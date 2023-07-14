@@ -2,9 +2,11 @@
 
 Thing to call api of Ovenmediaengine, to start/stop recording and check status
 
-### Set your api token and domain in stuff.conf (You need to put the values in quotes, like this: "http://pingusmc.org". The same for the token.)
+### Set your api token and domain in stuff.conf (You need to put the values in quotes, like this: "http://pingusmc.org:8081" (or other configured port). The same for the token.
 ### Do NOT remove 'Basic' from stuff.conf at token: "Basic TOKEN"! Otherwise, it will NOT work
 #### https api calls don't seem to work currently, didn't figure out why, yet.
+
+#### For more information on how to get the token and how to change the api port, check the [Ovenmediaengine Documentation](https://airensoft.gitbook.io/ovenmediaengine/rest-api)
 
 ### Build instructions:
 ```bash
