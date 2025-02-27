@@ -1,133 +1,94 @@
 extern crate getopts;
-extern crate lazy_static;
 
 use getopts::{HasArg, Occur, Options};
-use json::object;
-use reqwest::{Body, Client};
-use std::collections::HashMap;
-use std::env;
-use std::ops::Add;
-use std::path::Path;
-use std::process::exit;
-use crate::config::{CONFIG, create_config};
-
-mod config;
-
-type Error = Box<dyn std::error::Error>;
-type Result<T, E = Error> = std::result::Result<T, E>;
+use reqwest::Client;
+use serde::Serialize;
 
 // api stuff (send help btw)
 
-async fn startrecord() -> Result<()> {
-    let data = object! {
-    id: "stream",
-    stream: {
-      name: "stream"
-            },
-        segmentationRule : "continuity"
-      };
-
-    let domain = &CONFIG.domain.clone().add("/v1/vhosts/default/apps/app:startRecord");
-    let token = &CONFIG.token;
-
-    let client = Client::new();
-    let res = client
-        .post(domain)
-        .header("authorization", token)
-        .body(Body::from(data.dump()))
-        .send()
-        .await?;
-    println!("{}", res.status());
-
-    let body = res.bytes().await?;
-
-    let v = body.to_vec();
-    let s = String::from_utf8_lossy(&v);
-    println!("Startrecord: response: {} ", s);
-
-    Ok(())
+#[allow(non_snake_case)]
+#[derive(Serialize, Debug)]
+struct Stream {
+    name: String,
 }
 
-async fn stoprecord() -> Result<()> {
-    let mut map = HashMap::new();
-    map.insert("id", "stream");
-
-    let domain = &CONFIG.domain.clone().add("/v1/vhosts/default/apps/app:stopRecord");
-    let token = &CONFIG.token;
-
-    let client = Client::new();
-    let res = client
-        .post(domain)
-        .header("authorization", token)
-        .json(&map)
-        .send()
-        .await?;
-    println!("{}", res.status());
-
-    let body = res.bytes().await?;
-
-    let v = body.to_vec();
-    let s = String::from_utf8_lossy(&v);
-    println!("Stoprecord: response: {} ", s);
-
-    Ok(())
+#[derive(Serialize, Debug)]
+struct RecordStopCheck {
+    id: String,
 }
 
-async fn records() -> Result<()> {
-    let mut map = HashMap::new();
-    map.insert("id", "");
-
-    let domain = &CONFIG.domain.clone().add("/v1/vhosts/default/apps/app:records");
-    let token = &CONFIG.token;
-
-    let client = Client::new();
-    let res = client
-        .post(domain)
-        .header("authorization", token)
-        .json(&map)
-        .send()
-        .await?;
-    println!("{}", res.status());
-
-    let body = res.bytes().await?;
-
-    let v = body.to_vec();
-    let s = String::from_utf8_lossy(&v);
-    println!("Records: response: {} ", s);
-
-    Ok(())
+#[derive(Serialize, Debug)]
+struct RecordThingi {
+    id: String,
+    stream: Option<Stream>,
 }
 
-fn iwanttofuckingdie() {
-    let domain = &CONFIG.domain;
-    let token = &CONFIG.token;
+impl RecordThingi {
+    async fn start(url: String, token: String, id: String, name: String) -> Result<(), reqwest::Error> {
+        let client = Client::new();
+        let url = format!("{}/v1/vhosts/default/apps/app:startRecord", url);
+        let stream = Stream { name };
+        let body = RecordThingi { id, stream: Some(stream) };
+        
+        let res = client
+            .post(url)
+            .header("Authorization", token)
+            .json(&body)
+            .send()
+            .await?;
 
-    if domain.contains("DOMAIN") {
-        println!("\x1b[0;31myou might want to consider replacing 'DOMAIN' in stuff.conf with your actual api domain\x1b[0m");
-        exit(1);
+        println!("{}", res.text().await?);
+
+        Ok(())
+
     }
-    if token.contains("TOKEN") {
-        println!("\x1b[0;31myou might want to consider replacing 'TOKEN' in stuff.conf with your actual api token\x1b[0m");
-        exit(1);
+    async fn stop(url: String, token: String, id: String) -> Result<(), reqwest::Error> {
+        let client = Client::new();
+        let url = format!("{}/v1/vhosts/default/apps/app:stopRecord", url);
+        let body = RecordStopCheck { id };
+
+        let res = client
+            .post(url)
+            .header("Authorization", token)
+            .json(&body)
+            .send()
+            .await?;
+
+        println!("{}", res.text().await?);
+
+        Ok(())
+    }
+    async fn check(url: String, token: String, id: String) -> Result<(), reqwest::Error> {
+        let client = Client::new();
+        let url = format!("{}/v1/vhosts/default/apps/app:records", url);
+        let body = RecordStopCheck { id };
+        
+        let res = client
+            .post(url)
+            .header("Authorization", token)
+            .json(&body)
+            .send()
+            .await?;
+
+        println!("{}", res.text().await?);
+
+        Ok(())
     }
 }
 
 #[tokio::main]
-async fn main() -> Result<()> {
-    // create config if doesnt exist
-    if Path::new("stuff.conf").exists() {
-        println!("Using config: stuff.conf");
-    } else {
-        create_config().expect("failed to create config");
-    }
-    iwanttofuckingdie();
+async fn main() -> Result<(), reqwest::Error> {
+    let url = dotenvy::var("DOMAIN").unwrap().to_string();
+    let token = format!("Basic {}", dotenvy::var("TOKEN").unwrap());
+    let id = dotenvy::var("RECORD_ID").unwrap().to_string();
+    let name = dotenvy::var("RECORD_NAME").unwrap().to_string();
     // cli stuff
     fn print_usage(program: &str, opts: Options) {
         let brief = format!("Usage: {} [options]", program);
         print!("{}", opts.usage(&brief));
     }
 
-    let args: Vec<_> = env::args().collect();
+    let args: Vec<_> = std::env::args().collect();
     let program = args[0].clone();
 
     let mut opts = Options::new();
@@ -185,13 +146,13 @@ async fn main() -> Result<()> {
     }
 
     if matches.opt_present("1") {
-        startrecord().await?;
+        RecordThingi::start(url.clone(), token.clone(), id.clone(), name).await?;
     }
     if matches.opt_present("2") {
-        stoprecord().await?;
+        RecordThingi::stop(url.clone(), token.clone(), id.clone()).await?;
     }
     if matches.opt_present("3") {
-        records().await?;
+        RecordThingi::check(url, token, id).await?;
     }
     if matches.opt_present("c") {
         println!("Not implemented yet, deal with it");
