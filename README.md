@@ -14,5 +14,5 @@ cargo b -r
 ./record-thing-ome -h
 ```
 
-![note]
-Make sure, that you have a .env file, or environment variables exported. Refer to ```.env.example```
+> [!NOTE]
+> Make sure, that you have a .env file, or environment variables exported. Refer to ```.env.example```
